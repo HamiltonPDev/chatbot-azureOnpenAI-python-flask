@@ -29,7 +29,7 @@ cp .env.example .env          # then fill in the Azure values
 ./venv/bin/python app.py
 ```
 
-Serves on **http://127.0.0.1:5001**.
+Serves on **<http://127.0.0.1:5001>**.
 
 > **Not port 5000.** On macOS, AirPlay Receiver (Control Center) listens on
 > `*:5000` and answers `403`, silently shadowing a Flask server bound to
@@ -43,7 +43,7 @@ npm install
 npm run dev
 ```
 
-Open **http://localhost:5173**.
+Open **<http://localhost:5173>**.
 
 > Use `localhost`, not `127.0.0.1` — Vite binds IPv6 `[::1]` only, and the
 > backend's CORS allowlist expects the `localhost` origin.
@@ -52,19 +52,19 @@ Open **http://localhost:5173**.
 
 `backend/.env` (see `.env.example`):
 
-| Variable | Purpose |
-|---|---|
-| `AZURE_OPENAI_KEY` | API key. Never leaves the server. |
-| `AZURE_OPENAI_ENDPOINT` | e.g. `https://<resource>.openai.azure.com/` |
-| `AZURE_OPENAI_DEPLOYMENT` | The deployment name, e.g. `gpt-3` |
-| `AZURE_OPENAI_API_VERSION` | e.g. `2024-02-01` |
-| `PORT` | Backend port. Defaults to `5001`. |
-| `FRONTEND_ORIGIN` | CORS allowlist entry. Defaults to `http://localhost:5173`. |
+| Variable                   | Purpose                                                    |
+| -------------------------- | ---------------------------------------------------------- |
+| `AZURE_OPENAI_KEY`         | API key. Never leaves the server.                          |
+| `AZURE_OPENAI_ENDPOINT`    | e.g. `https://<resource>.openai.azure.com/`                |
+| `AZURE_OPENAI_DEPLOYMENT`  | The deployment name, e.g. `gpt-3`                          |
+| `AZURE_OPENAI_API_VERSION` | e.g. `2024-02-01`                                          |
+| `PORT`                     | Backend port. Defaults to `5001`.                          |
+| `FRONTEND_ORIGIN`          | CORS allowlist entry. Defaults to `http://localhost:5173`. |
 
 The frontend reads one optional variable, from `frontend/.env`:
 
-| Variable | Purpose |
-|---|---|
+| Variable        | Purpose                                                |
+| --------------- | ------------------------------------------------------ |
 | `VITE_API_BASE` | Backend base URL. Defaults to `http://127.0.0.1:5001`. |
 
 ---
@@ -73,18 +73,18 @@ The frontend reads one optional variable, from `frontend/.env`:
 
 ### From the browser
 
-Open http://localhost:5173, type a question, press **Send** or **Enter**.
+Open <http://localhost:5173>, type a question, press **Send** or **Enter**.
 The right-hand panel traces the request and reports measured timings.
 
 Try these:
 
-| Action | Expected |
-|---|---|
-| Ask "What is a trust boundary?" | An answer, with per-stage timings |
-| Press Send with an empty box | `Please ask a question!` — no request is sent |
+| Action                                      | Expected                                         |
+| ------------------------------------------- | ------------------------------------------------ |
+| Ask "What is a trust boundary?"             | An answer, with per-stage timings                |
+| Press Send with an empty box                | `Please ask a question!` — no request is sent    |
 | Ask a follow-up like "what did I just ask?" | It remembers — history travels with each request |
-| Press **Clear** | Transcript and trace reset |
-| Toggle the ◐ icon | Light / dark theme, remembered across reloads |
+| Press **Clear**                             | Transcript and trace reset                       |
+| Toggle the ◐ icon                           | Light / dark theme, remembered across reloads    |
 
 ### From the terminal
 
@@ -228,33 +228,33 @@ browser gets one sentence:
 Recorded as numbered ADRs in **[docs/ADR.md](docs/ADR.md)**, referenced by
 number from the source files.
 
-| | |
-|---|---|
-| ADR-001 | Flask over FastAPI |
+|         |                                                                                  |
+| ------- | -------------------------------------------------------------------------------- |
+| ADR-001 | Flask over FastAPI                                                               |
 | ADR-002 | The backend is a trust boundary, not a proxy — the key never reaches the browser |
-| ADR-003 | Stateless server; the client carries history, the server trims it |
-| ADR-004 | Pydantic at the boundary; `Literal` on `role` closes a prompt-injection hole |
-| ADR-005 | No database |
-| ADR-006 | Whole responses, not streaming |
-| ADR-007 | Request trace in the UI, with measured timings only |
-| ADR-008 | Report the model Azure returns, not the deployment label |
-| ADR-009 | Atomic Design in strict TypeScript |
-| ADR-010 | Theming through CSS custom properties |
+| ADR-003 | Stateless server; the client carries history, the server trims it                |
+| ADR-004 | Pydantic at the boundary; `Literal` on `role` closes a prompt-injection hole     |
+| ADR-005 | No database                                                                      |
+| ADR-006 | Whole responses, not streaming                                                   |
+| ADR-007 | Request trace in the UI, with measured timings only                              |
+| ADR-008 | Report the model Azure returns, not the deployment label                         |
+| ADR-009 | Atomic Design in strict TypeScript                                               |
+| ADR-010 | Theming through CSS custom properties                                            |
 
 ---
 
 ## Requirements covered
 
-| Requirement | Where |
-|---|---|
-| Input box, Send button, response area | `Composer`, `MessageList` |
-| React state for input and responses | `useChat` |
-| Python API with a `/query` endpoint | `app.py` |
-| Azure OpenAI connection | `azure_client.py` |
-| Keys via environment variables | `.env`, read in `AzureClient.__init__` |
+| Requirement                            | Where                                                        |
+| -------------------------------------- | ------------------------------------------------------------ |
+| Input box, Send button, response area  | `Composer`, `MessageList`                                    |
+| React state for input and responses    | `useChat`                                                    |
+| Python API with a `/query` endpoint    | `app.py`                                                     |
+| Azure OpenAI connection                | `azure_client.py`                                            |
+| Keys via environment variables         | `.env`, read in `AzureClient.__init__`                       |
 | Empty input → "Please ask a question!" | `useChat` (client) + `schemas.py` rule, returned by `app.py` |
-| *Bonus:* clear the conversation | `ChatHeader` → `useChat.clear` |
-| *Bonus:* "Thinking…" while loading | `ThinkingBubble` |
+| *Bonus:* clear the conversation                 | `ChatHeader` → `useChat.clear`                               |
+| *Bonus:* "Thinking…" while loading              | `ThinkingBubble`                                             |
 
 Beyond the brief: request tracing with measured timings, a light/dark theme,
 prompt-injection defence at the schema boundary, a 30s `AbortController`
