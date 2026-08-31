@@ -10,8 +10,8 @@ real timings of every stage it passed through.
 
 ## Demo
 
-> `docs/demo.mp4` — the app answering a question, refusing an empty one,
-> clearing the conversation, and switching theme.
+`docs/demo.mp4` — the app answering a question, refusing an empty one,
+clearing the conversation, and switching theme.
 
 ---
 
@@ -61,6 +61,12 @@ Open **http://localhost:5173**.
 | `PORT` | Backend port. Defaults to `5001`. |
 | `FRONTEND_ORIGIN` | CORS allowlist entry. Defaults to `http://localhost:5173`. |
 
+The frontend reads one optional variable, from `frontend/.env`:
+
+| Variable | Purpose |
+|---|---|
+| `VITE_API_BASE` | Backend base URL. Defaults to `http://127.0.0.1:5001`. |
+
 ---
 
 ## Testing it
@@ -90,22 +96,25 @@ curl http://127.0.0.1:5001/health
 curl -X POST http://127.0.0.1:5001/query \
   -H 'Content-Type: application/json' \
   -d '{"question":"In one sentence, what is a trust boundary?"}'
-
-# the empty-input rule
-curl -X POST http://127.0.0.1:5001/query \
-  -H 'Content-Type: application/json' -d '{"question":""}'
 ```
 
 ### Automated checks
 
-No test framework required — each backend module ships a self-check script
-that stubs the network, so none of these spend an Azure call.
+No test framework required. These three stub the network, so none of them
+spend an Azure call:
 
 ```bash
 cd backend
 ./venv/bin/python check_schemas.py        # 10 assertions — the request contract
 ./venv/bin/python check_azure_client.py   # 17 assertions — message assembly, trimming, errors
 ./venv/bin/python check_app.py            # 21 assertions — routes, status codes, CORS
+```
+
+`check_azure.py` is different: it is a connectivity smoke test that makes a
+**real** call to Azure. Run it to confirm credentials, not as part of a suite.
+
+```bash
+./venv/bin/python check_azure.py
 ```
 
 ```bash
@@ -129,11 +138,9 @@ browser ──POST /query──► Flask ──chat.completions──► Azure O
 There is deliberately **no arrow from the browser to Azure**. That absence is
 the reason the middle tier exists: the API key never reaches the client.
 
-1. **Validate (client)** — empty input never reaches the network.
-2. **POST /query (Flask)** — Pydantic validates the payload or returns `400`.
-3. **Chat completion (Azure)** — history is trimmed, the system prompt is
-   prepended, the model answers. Failures become a generic `502`.
-4. **Render (client)** — the answer is appended and the trace updated.
+Input is validated in the browser, validated again by Pydantic, trimmed and
+forwarded to the model, and rendered with the timing of each stage. Validation
+failures return `400`; upstream failures return a generic `502`.
 
 ---
 
@@ -142,9 +149,12 @@ the reason the middle tier exists: the API key never reaches the client.
 ```
 backend/
   app.py               HTTP layer: routes, CORS, error mapping
-  azure_client.py      the ONLY module that talks to Azure
+  azure_client.py      the only module the app uses to reach Azure
   schemas.py           the request contract (Pydantic v2)
-  check_*.py           self-check scripts, no network
+  check_schemas.py     \
+  check_azure_client.py > self-checks, network stubbed
+  check_app.py         /
+  check_azure.py       connectivity smoke test — real Azure call
 frontend/src/
   quarks/              design tokens — import nothing
   types/chat.ts        the wire contract, mirroring schemas.py
@@ -196,9 +206,9 @@ Request:
 }
 ```
 
-`400` — the question is missing, empty, over 1000 characters, not a string, the
-body is malformed JSON, or a history entry carries a role other than `user` or
-`assistant`:
+`400` — the question is missing, empty, over 1000 characters or not a string;
+the body is malformed JSON; or a history entry is missing `content` or carries
+a role other than `user` or `assistant`:
 
 ```json
 { "error": "Please ask a question!" }
@@ -215,49 +225,21 @@ browser gets one sentence:
 
 ## Design decisions
 
-**The backend is a trust boundary, not a proxy.** The browser could call Azure
-directly, but the API key would then be readable in devtools by any visitor.
-Routing every call through Flask costs one network hop and keeps the key, the
-system prompt, the history policy, and the error surface on the server.
+Recorded as numbered ADRs in **[docs/ADR.md](docs/ADR.md)**, referenced by
+number from the source files.
 
-**The server is stateless; the client carries the history.** The model has no
-memory, so context must be supplied on every call. Sending it from the browser
-means no session store and no sticky sessions. The server trims to the last 10
-messages before forwarding — the client proposes context, the server decides
-what to spend.
-
-**`role` is a closed set.** `Literal["user", "assistant"]` rejects a client
-trying to inject a `system` turn, which would otherwise land in the message
-array and override the system prompt. Three words of type annotation close a
-prompt-injection hole.
-
-**Validation is duplicated on purpose.** The browser blocks empty input for
-responsiveness; `schemas.py` blocks it because anyone can `curl` the API. The
-client check is UX, the server check is the rule.
-
-**One generic `400`.** Every rejection returns the same message so a caller
-probing the API learns nothing about which rule it tripped.
-
-**Timings are measured, never simulated.** The client times validation and
-render; the server reports how long Azure took; the difference is network plus
-Flask. Nothing in the trace panel is invented.
-
-**Whole responses, not streaming.** Simpler contract and error handling, at the
-cost of perceived latency on long answers. The "Thinking…" state and the live
-trace mitigate it. Streaming is the first improvement I would make.
-
-### A note on the model
-
-The deployment is **named** `gpt-3`, and the brief describes it as
-`gpt-35-turbo`. Azure reports something else:
-
-```
-AZURE_OPENAI_DEPLOYMENT (env) : gpt-3
-response.model (what ran)     : gpt-4.1-mini-2025-04-14
-```
-
-A deployment name is an arbitrary label, not the model behind it. The UI shows
-what Azure reports actually ran, and keeps the label alongside it.
+| | |
+|---|---|
+| ADR-001 | Flask over FastAPI |
+| ADR-002 | The backend is a trust boundary, not a proxy — the key never reaches the browser |
+| ADR-003 | Stateless server; the client carries history, the server trims it |
+| ADR-004 | Pydantic at the boundary; `Literal` on `role` closes a prompt-injection hole |
+| ADR-005 | No database |
+| ADR-006 | Whole responses, not streaming |
+| ADR-007 | Request trace in the UI, with measured timings only |
+| ADR-008 | Report the model Azure returns, not the deployment label |
+| ADR-009 | Atomic Design in strict TypeScript |
+| ADR-010 | Theming through CSS custom properties |
 
 ---
 
@@ -270,7 +252,7 @@ what Azure reports actually ran, and keeps the label alongside it.
 | Python API with a `/query` endpoint | `app.py` |
 | Azure OpenAI connection | `azure_client.py` |
 | Keys via environment variables | `.env`, read in `AzureClient.__init__` |
-| Empty input → "Please ask a question!" | `useChat` (client) + `schemas.py` (server) |
+| Empty input → "Please ask a question!" | `useChat` (client) + `schemas.py` rule, returned by `app.py` |
 | *Bonus:* clear the conversation | `ChatHeader` → `useChat.clear` |
 | *Bonus:* "Thinking…" while loading | `ThinkingBubble` |
 

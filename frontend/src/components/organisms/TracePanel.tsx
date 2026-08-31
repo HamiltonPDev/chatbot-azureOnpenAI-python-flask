@@ -18,7 +18,7 @@ interface StageDefinition {
   where: string;
 }
 
-/** Mirrors the control flow in ARCHITECTURE.md §3. */
+/** Mirrors the request pipeline described in docs/ADR.md (ADR-007). */
 const STAGES: StageDefinition[] = [
   { id: "validate", label: "validate input", where: "client" },
   { id: "post", label: "POST /query", where: "flask" },
