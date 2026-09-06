@@ -69,7 +69,10 @@ export function ChatHeader({
         >
           react · flask · {model ?? "azure openai"}
           {deployment && model && !model.startsWith(deployment) && (
-            <span style={{ color: colors.rule }}> · deployed as {deployment}</span>
+            <span style={{ color: colors.rule }}>
+              {" "}
+              · deployed as {deployment}
+            </span>
           )}
         </p>
       </div>

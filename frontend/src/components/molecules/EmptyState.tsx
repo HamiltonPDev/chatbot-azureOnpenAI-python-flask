@@ -19,9 +19,16 @@ export function EmptyState() {
       >
         Ask a question to start.
       </p>
-      <p style={{ margin: "10px 0 0", fontSize: 14, lineHeight: 1.65, color: colors.muted }}>
-        Each request is traced end to end — you&apos;ll see it validated, sent to the Python
-        service, answered by the model, and rendered.
+      <p
+        style={{
+          margin: "10px 0 0",
+          fontSize: 14,
+          lineHeight: 1.65,
+          color: colors.muted,
+        }}
+      >
+        Each request is traced end to end — you&apos;ll see it validated, sent
+        to the Python service, answered by the model, and rendered.
       </p>
     </div>
   );

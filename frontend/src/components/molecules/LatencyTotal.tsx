@@ -13,7 +13,13 @@ export interface LatencyTotalProps {
 
 export function LatencyTotal({ latencyMs }: LatencyTotalProps) {
   return (
-    <div style={{ borderTop: `1px solid ${colors.rule}`, marginTop: 10, paddingTop: 14 }}>
+    <div
+      style={{
+        borderTop: `1px solid ${colors.rule}`,
+        marginTop: 10,
+        paddingTop: 14,
+      }}
+    >
       <Eyebrow>total</Eyebrow>
       <p
         key={latencyMs ?? "idle"}

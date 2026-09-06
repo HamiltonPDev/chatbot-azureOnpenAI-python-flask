@@ -9,7 +9,11 @@
  */
 import { useEffect, useRef } from "react";
 
-import { EmptyState, MessageBubble, ThinkingBubble } from "@/components/molecules";
+import {
+  EmptyState,
+  MessageBubble,
+  ThinkingBubble,
+} from "@/components/molecules";
 import { layout } from "@/quarks";
 import type { ChatMessage } from "@/types/chat";
 
