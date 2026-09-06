@@ -219,3 +219,6 @@ __marimo__/
 
 # Local tooling cache
 .atl/
+
+# macOS
+.DS_Store
