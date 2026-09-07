@@ -17,9 +17,20 @@ export interface ChatLayoutProps {
   aside: ReactNode;
 }
 
-export function ChatLayout({ header, conversation, composer, aside }: ChatLayoutProps) {
+export function ChatLayout({
+  header,
+  conversation,
+  composer,
+  aside,
+}: ChatLayoutProps) {
   return (
-    <div style={{ background: colors.paper, minHeight: "100%", fontFamily: fonts.sans }}>
+    <div
+      style={{
+        background: colors.paper,
+        minHeight: "100%",
+        fontFamily: fonts.sans,
+      }}
+    >
       {header}
       <div className="ca-wrap" style={{ background: colors.rule }}>
         <section

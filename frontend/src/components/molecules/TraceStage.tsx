@@ -16,13 +16,31 @@ export interface TraceStageProps {
   showConnector: boolean;
 }
 
-export function TraceStage({ label, where, state, showConnector }: TraceStageProps) {
+export function TraceStage({
+  label,
+  where,
+  state,
+  showConnector,
+}: TraceStageProps) {
   return (
     <div style={{ display: "flex", gap: 10, marginBottom: 2 }}>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <StageDot status={state?.status} />
         {showConnector && (
-          <span style={{ width: 1, flex: 1, minHeight: 26, background: colors.rule }} />
+          <span
+            style={{
+              width: 1,
+              flex: 1,
+              minHeight: 26,
+              background: colors.rule,
+            }}
+          />
         )}
       </div>
       <div style={{ paddingBottom: 12, minWidth: 0 }}>

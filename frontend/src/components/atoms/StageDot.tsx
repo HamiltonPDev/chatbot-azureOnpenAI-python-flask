@@ -15,12 +15,20 @@ export interface StageDotProps {
 
 export function StageDot({ status }: StageDotProps) {
   const color =
-    status === "done" ? colors.done : status === "active" ? colors.signal : colors.faint;
+    status === "done"
+      ? colors.done
+      : status === "active"
+        ? colors.signal
+        : colors.faint;
 
   return (
     <span
       className={
-        status === "active" ? "ca-live" : status === "done" ? "ca-dot-done" : undefined
+        status === "active"
+          ? "ca-live"
+          : status === "done"
+            ? "ca-dot-done"
+            : undefined
       }
       style={{
         width: 7,

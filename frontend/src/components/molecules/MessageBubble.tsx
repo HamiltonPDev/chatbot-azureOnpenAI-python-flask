@@ -32,7 +32,11 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         <div
           style={{
             background: isUser ? colors.ink : colors.panel,
-            color: isUser ? colors.inkInverse : message.error ? colors.warn : colors.ink,
+            color: isUser
+              ? colors.inkInverse
+              : message.error
+                ? colors.warn
+                : colors.ink,
             border: isUser ? "none" : `1px solid ${colors.rule}`,
             borderLeft: isUser
               ? undefined
